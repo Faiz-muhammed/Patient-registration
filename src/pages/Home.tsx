@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PatientRegForm from "../components/PatientRegForm";
 import { Database, Eye, Plus, Users } from "lucide-react";
+import PatientList from "../components/PatientList";
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState('register');
@@ -49,6 +50,9 @@ const HomePage = () => {
           <div className="p-6">
             {activeTab === 'register' && (
               <PatientRegForm />
+            )}
+            {activeTab === 'view' && (
+              <PatientList />
             )}
           </div>
         </div>
