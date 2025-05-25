@@ -54,6 +54,9 @@ const HomePage = () => {
             {activeTab === 'view' && (
               <PatientList />
             )}
+            {activeTab === 'sql' && (
+              <PatientList />
+            )}
           </div>
         </div>
       </div>
