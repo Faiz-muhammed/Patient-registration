@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
-import InputField from './InputField';
+import InputField from '../components/InputField';
+import { registerPatient } from '../models/patientModel';
+import type { Patient } from '../types/patient';
 
 const DEFAULT_FORM_DATA = {
   firstName: '',
@@ -12,8 +14,8 @@ const DEFAULT_FORM_DATA = {
   address: ''
 }
 
-const PatientRegForm = () => {
-  const [formData, setFormData] = useState<any>(DEFAULT_FORM_DATA);
+const PatientRegForm = ({ isInitialized }:any) => {
+  const [formData, setFormData] = useState<Patient>(DEFAULT_FORM_DATA);
   
   const [errors, setErrors] = useState<any>({});
   const [submitting, setSubmitting] = useState(false);
@@ -22,14 +24,27 @@ const PatientRegForm = () => {
     const { name, value } = e.target;
     setFormData((prev:any) => ({ ...prev, [name]: value }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev:any) => ({ ...prev, [name]: '' }));
     }
   };
 
   const handleSubmit = async () => {
-  // 
+    if (!isInitialized) return;
+    
+    setSubmitting(true);
+    try {
+      const result =await registerPatient(formData);
+      if(result) setFormData(DEFAULT_FORM_DATA);
+      alert('Patient registered successfully!');
+      setErrors({});
+    } catch (error:any) {
+      setErrors({ submit: error.message });
+      console.error('Registration failed:', error);
+      alert('Registration failed. Please check if email is already in use.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

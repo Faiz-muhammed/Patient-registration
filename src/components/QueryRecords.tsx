@@ -1,19 +1,26 @@
 import { useState } from 'react';
-import { Database, Play, AlertCircle } from 'lucide-react';
+import { Database, Play, AlertCircle, CheckCircle } from 'lucide-react';
+import { executeQuery } from '../models/patientModel';
 
-const SQLInterface = () => {
+const SQLInterface = ({isInitialized}:any) => {
   const [sqlQuery, setSqlQuery] = useState('SELECT * FROM patients ORDER BY created_at DESC LIMIT 10;');
   const [sqlResult, setSqlResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState<any>(false);
 
   const executeCustomQuery = async () => {
+    if (!sqlQuery.trim() || !isInitialized) return;
     
     setIsExecuting(true);
     
     try {
-        setSqlResult([]);
+      const result = await executeQuery(sqlQuery);
+      setSqlResult(result);
     } catch (error: any) {
-        console.error('Error occured :',error)
+      setSqlResult({
+        success: false,
+        data: [],
+        error: error.message || 'An error occurred while executing the query',
+      });
     } finally {
       setIsExecuting(false);
     }
@@ -90,16 +97,32 @@ const SQLInterface = () => {
 
         {sqlResult && (
           <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex items-center mb-3">
+              {sqlResult.error ? (
+                <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+              ) : (
+                <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
+              )}
+              <h3 className="font-medium text-gray-900">Query Result:</h3>
+            </div>
+            
+            {sqlResult.error ? (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <div className="text-red-800 font-medium">Error:</div>
+                <div className="text-red-600 text-sm mt-1">{sqlResult.error}</div>
+              </div>
+            ) : (
               <div className="space-y-3">
                 <div className="overflow-x-auto">
                   <pre className="text-sm bg-white p-4 rounded border max-h-96 overflow-y-auto">
-                    {JSON.stringify(sqlResult, null, 2)}
+                    {JSON.stringify(sqlResult.data, null, 2)}
                   </pre>
                 </div>
                 <div className="text-sm text-gray-600 bg-blue-50 p-2 rounded">
-                  <strong>Result:</strong> {sqlResult.length || 0} rows returned
+                  <strong>Result:</strong> {sqlResult.data?.length || 0} rows returned
                 </div>
               </div>
+            )}
           </div>
         )}
 
